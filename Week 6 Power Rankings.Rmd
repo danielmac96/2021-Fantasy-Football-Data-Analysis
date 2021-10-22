@@ -1,0 +1,128 @@
+---
+title: "Week 6 Power Rankings"
+output: pdf_document
+---
+
+Hey Fantasy brethren welcome to my week 6 power rankings. Soon the gambling gods will bless CT with domestic ways for us to piss away some hard earned money, until that happens lets keep the theme of last year. Through 5 weeks out of 35 played games 19 favorites have covered and 16 dogs have done the same. The average points scored has been 114.6 points (113.5 has been the average projection). The average point difference has been 26.9 and the largest margin has been 73 and the smallest being 0.06. In the matchups are my ranks (done blindly to profitability and scores throughout the season). Here are the ranks and picks going into week 6:
+
+### Tampon Gay Cuckaneers (-25.0) - Sean (3) v The Clean Team - Doan (2) OU 238.1
+Two profitable teams, Mr.clean may look like Johnny sins and hes about to get cucked hard by these tampons. These cuckaneers average the most points per game (134.2) and have been favored every week this season landing in the top 3 scoring teams twice. This team beats their projections on average of 13 pts. The Clean team has beat its projection every week which is why we are smashing the Over here as both teams beat their projections by 10 but these cucks from tampon have the boom factor that is missing from these clean bois, Cuckaneers -25.0.
+
+### 17 Idiots (-1.6) - Ev (12) v Brandon AIYUKEN - Chooch Mama (6) OU 240.2
+Idiots are the favorite this week somehow, this season this group of guys have covered and been in the bottom 4 in scoring the same number of times (3). Chooch mamas squad comes into the matchup first time as a dog this season despite only beating their projected score twice this year. This game will go under as the teams only beat their projections a combines 3 times this season. Take the points on chooch vs the 12th scoring team. 
+
+### New England Clam Chowder (-7.4) v Remy (8) v When The When The - Bepis (9) OU 216.6
+I feel clammy for vegas looking at this spread, the team that has not been favored this season but has been in top 3 scoring 3 times this year (has been bottom 4 the other 2 weeks) is getting a measly 7 points. Ill take that spread hoping the good version of this team shows up. Bompis has a squad that has beat its projected score once, take this under as well.
+
+### Fuck You - Zac B (4) v $100 FAAB down the drain (-12.7) - ETH (11) OU 222.3
+The $100 FAAB may be down the drain, so will mine once CT bets are legal but this team stays around its projections on average and has covered twice this year. The Fuck you team has hit the over and covered 3 times this year along with one top 3 finish, Eths team hates getting top with 0 top 3 places to show this season. Take this under and fuck you.
+
+### What the fuck ever (-27.9) - FAR33D (13) v Suck my Peneis - Handsome Ricky (5) OU 203.4
+A saddening name for a team that has been fitting, its first time being favored this season and im not buying it. This team has been a power bottom being bottom 4,4 times this season and underperforms its projection on average by 11 pts. Ricky may be handsome enough to cover this spread (covered 4/5 games) but not enough to make up for this sickeningly low over. Take the under and handsome ricky here.
+
+### Soul Crushing Reality (-5.4) - Jordy (7) v My cock is Chubby Hubby - James and the giant Peach (14) OU 221.4
+James if you read this ill give you $1 FAAB. Last in pts and -17 vs projections on avg this team doesnt look great right now. Hammer the jordy spread here since his team isnt allergic to top 3 like james team is. I would also take the under here.
+
+### Cooper Cuck My Shit Loser Ass - Zac L (10) v Certified Thicc Boy (-10.3) - Thicky C (1) OU 238.1
+This thicc ass team is very good at 3 things, hitting overs, projections (4 times over, +11 on avg vs projection) and leg days. Team Shit loser ass clearly hates top, 0 top 3 scoring appearances this season but has hit the over 3 times but has only covered once. Though the thicc spread Im taking thicc boy spread and the over in this matchup. 
+
+Teamids:\
+1 ETH (11)\
+2 DOAN (2)\
+3 RICKY (5)\
+4 SEAN (3)\
+5 NICK (1)\
+6 BEP (9)\
+7 ZAC B (4)\
+8 REMY (8)\
+9 JORDY (7)\
+10 JAMES (14)\
+11 FARID (13)\
+12 EV (12)\
+13 CHOOCH (6)\
+14 ZAC L (10)\
+
+```{r setup, echo=FALSE}
+suppressMessages(library(dplyr))
+suppressMessages(library(knitr))
+suppressMessages(library(kableExtra))
+setwd("C:/Users/danie/PycharmProjects/pythonProject")
+espn <- read.csv("2021_The_Federation_of_Bros_Position.csv", header = T)
+espn <- espn[,-1]
+espn[is.na(espn)] = 0
+scores <- espn %>% filter(!Slot %in% c("Bench", "IR")) %>% 
+  group_by(Week, Team) %>% 
+  summarize(score = sum(Actual), projection = sum(Proj))
+
+Schedule <- read.csv("2021_The_Federation_of_Bros_Schedule.csv", header = T)
+Schedule <- Schedule[,-1]
+
+
+home_join <- inner_join(Schedule, scores, by = c("weekid" = "Week", "homeid" = "Team"))
+full <- inner_join(home_join, scores, by = c("weekid" = "Week", "awayid" = "Team"))
+full6 <- full %>% filter(weekid ==6) %>% select(-c(gameid,homeptsactual,awayptsactual,score.x,score.y)) %>% mutate(favorite = if_else(projection.x > projection.y,homeid,awayid), 
+                          favoritespread = if_else(projection.x > projection.y, projection.y-projection.x, projection.x-projection.y),
+                          OUline = projection.x + projection.y)
+full <- full[1:35,]
+full_schedule <- full %>%
+  select(-c(score.x,score.y)) %>%
+  rename(homeprojection = projection.x) %>%
+  rename(awayprojection = projection.y) %>%
+  mutate(favorite = if_else(homeprojection > awayprojection,homeid,awayid), 
+         favoritespread = if_else(homeprojection > awayprojection, awayprojection-homeprojection, homeprojection-awayprojection),
+         favoritespreadactual = if_else(homeprojection > awayprojection, awayptsactual-homeptsactual, homeptsactual-awayptsactual),
+         cover = case_when(((homeprojection > awayprojection) & (homeptsactual + favoritespread > awayptsactual))|
+                             ((awayprojection > homeprojection) & (awayptsactual + favoritespread < homeptsactual))  ~ homeid
+                           ,TRUE ~ awayid),
+         OU = if_else((homeptsactual+awayptsactual) > (homeprojection+awayprojection),"O","U"),
+         OUline = homeprojection + awayprojection,
+         OUactual = homeptsactual + awayptsactual)
+
+home <- full_schedule %>% select(-c(awayid,awayptsactual,awayprojection)) %>% rename(teamid = homeid, pts = homeptsactual, projected = homeprojection)
+away <- full_schedule %>% select(-c(homeid,homeptsactual,homeprojection)) %>% rename(teamid = awayid, pts = awayptsactual, projected = awayprojection)
+
+teamdata <- rbind(home,away) %>% mutate(cover = ifelse(cover == teamid,1,0),
+                                        OU = ifelse(OU == "O",1,0),
+                                        favorite = ifelse(favorite==teamid,1,0),
+                                        favoritecover = ifelse(favorite==1 & cover == 1,1,0),
+                                        dogcover= ifelse(favorite == 0 & cover == 1,1,0),
+                                        projptdiff = pts - projected,
+                                        beatproj = ifelse(projptdiff > 0,1,0))
+
+Leaguestats <- teamdata %>%
+  summarize(Favoritecovers = sum(favoritecover),
+            Dogcovers = sum(dogcover),
+            Overs = sum(OU)/2, 
+            Avgpts = mean(pts), 
+            Avgproj = mean(projected), 
+            AvgFavoriteSpread = mean(favoritespread), 
+            Avgpointdiff = mean(abs(favoritespreadactual)),
+            LargestMargin = max(abs(favoritespreadactual)),
+            smallestMargin = min(abs(favoritespreadactual))
+  )
+#kable(Leaguestats)
+kable(Leaguestats, format="latex", booktabs=TRUE) %>% 
+  kable_styling(latex_options="scale_down")
+
+teamdata <- teamdata %>% group_by(weekid) %>% mutate(avgpts = mean(pts),quantile = ntile(pts,4), top3 = ifelse(quantile ==4,1,0), bottom4 = ifelse(quantile == 1,1,0))
+
+
+Teamstats <- teamdata %>% group_by(teamid) %>%
+  summarize(Favoritecovers = sum(favoritecover),
+            Dogcovers = sum(dogcover),
+            Favorite = sum(favorite),
+            Totalcover = sum(dogcover) + sum(favoritecover),
+            Overs = sum(OU), 
+            Avgpts = mean(pts), 
+            Avgproj = mean(projected), 
+            beatprojection = sum(beatproj),
+            top3pts = sum(top3),
+            bottom4pts = sum(bottom4)
+  )
+#kable(Teamstats)
+kable(Teamstats, format="latex", booktabs=TRUE) %>% 
+  kable_styling(latex_options="scale_down")
+
+```
+
+
